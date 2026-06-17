@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block titulo %}Registrar Activo{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header"><h3 class="mb-0">Registro de Activo</h3></div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="id_nombre" class="form-label">Nombre del Activo</label>
+            {{ form.nombre }}
+            {{ form.nombre.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label for="id_descripcion" class="form-label">Descripción</label>
+            {{ form.descripcion }}
+            {{ form.descripcion.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label for="id_tipo" class="form-label">Tipo de Activo</label>
+            {{ form.tipo }}
+            {{ form.tipo.errors }}
+          </div>
+
+          <hr />
+          <h5 class="mb-3">Valoración CIA</h5>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="id_confidencialidad" class="form-label">Confidencialidad</label>
+              {{ form.confidencialidad }}
+              {{ form.confidencialidad.errors }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="id_integridad" class="form-label">Integridad</label>
+              {{ form.integridad }}
+              {{ form.integridad.errors }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="id_disponibilidad" class="form-label">Disponibilidad</label>
+              {{ form.disponibilidad }}
+              {{ form.disponibilidad.errors }}
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">Guardar Activo</button>
+            <a href="{% url 'lista_activos' %}" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

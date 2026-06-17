@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block titulo %}Reporte de riesgos{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Reporte de gestión de riesgos</h2>
+  <button onclick="window.print()" class="btn btn-outline-secondary">🖨️ Imprimir / PDF</button>
+</div>
+
+<p class="text-muted">
+  Resumen para partes interesadas. Total de riesgos analizados: <strong>{{ total }}</strong>.
+  Distribución: Bajo {{ niveles.Bajo }}, Medio {{ niveles.Medio }},
+  Alto {{ niveles.Alto }}, Crítico {{ niveles.Crítico }}.
+</p>
+
+<table class="table table-bordered table-sm">
+  <thead class="table-dark">
+    <tr>
+      <th>Activo</th><th>Amenaza</th><th>Vulnerabilidad</th>
+      <th>Riesgo inherente</th><th>Estrategia</th>
+      <th>Controles propuestos</th><th>Responsable</th>
+      <th>Riesgo residual</th><th>Estado</th><th>Observaciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in riesgos %}
+    <tr>
+      <td>{{ r.activo.nombre }}</td>
+      <td>{{ r.amenaza.nombre }}</td>
+      <td>{{ r.vulnerabilidad.nombre }}</td>
+      <td>{{ r.nivel_riesgo }} ({{ r.nivel_riesgo_texto }})</td>
+      <td>{{ r.get_estrategia_display|default:"—" }}</td>
+      <td>
+        {% for c in r.controles_propuestos.all %}{{ c.codigo }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+      </td>
+      <td>{{ r.responsable|default:"—" }}</td>
+      <td>{% if r.riesgo_residual %}{{ r.riesgo_residual }} ({{ r.riesgo_residual_texto }}){% else %}—{% endif %}</td>
+      <td>{{ r.get_estado_display }}</td>
+      <td>{{ r.observaciones|default:"—"|truncatechars:60 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="10" class="text-center text-muted py-4">Sin datos.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

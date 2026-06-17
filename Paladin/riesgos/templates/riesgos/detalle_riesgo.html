@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block titulo %}Detalle de riesgo{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Riesgo: {{ riesgo.activo.nombre }}</h2>
+  <div>
+    <a href="{% url 'editar_riesgo' riesgo.id %}" class="btn btn-outline-primary">Editar</a>
+    <a href="{% url 'lista_riesgos' %}" class="btn btn-outline-secondary">Volver</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">Identificación</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><strong>Activo:</strong> {{ riesgo.activo.nombre }} ({{ riesgo.activo.get_tipo_display }})</li>
+        <li class="list-group-item"><strong>Amenaza:</strong> {{ riesgo.amenaza.nombre }}</li>
+        <li class="list-group-item"><strong>Vulnerabilidad:</strong> {{ riesgo.vulnerabilidad.nombre }}</li>
+        <li class="list-group-item"><strong>Controles existentes:</strong> {{ riesgo.controles_existentes|default:"—" }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">Valoración</div>
+      <div class="card-body">
+        <p>Riesgo inherente: <strong>{{ riesgo.probabilidad }} × {{ riesgo.impacto }} = {{ riesgo.nivel_riesgo }}</strong>
+          {% include 'riesgos/_badge_nivel.html' with texto=riesgo.nivel_riesgo_texto %}</p>
+        <p>Riesgo residual:
+          {% if riesgo.riesgo_residual %}
+            <strong>{{ riesgo.probabilidad_residual }} × {{ riesgo.impacto_residual }} = {{ riesgo.riesgo_residual }}</strong>
+            {% include 'riesgos/_badge_nivel.html' with texto=riesgo.riesgo_residual_texto %}
+          {% else %}<span class="text-muted">No evaluado</span>{% endif %}
+        </p>
+        {% if riesgo.reduccion is not None %}
+          <p class="mb-0">Reducción lograda: <strong>{{ riesgo.reduccion }}</strong> puntos</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">Tratamiento</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><strong>Estrategia:</strong> {{ riesgo.get_estrategia_display|default:"—" }}</li>
+        <li class="list-group-item"><strong>Responsable:</strong> {{ riesgo.responsable|default:"—" }}</li>
+        <li class="list-group-item"><strong>Controles propuestos:</strong>
+          <ul class="mb-0">
+            {% for c in riesgo.controles_propuestos.all %}
+              <li>{{ c.codigo }} — {{ c.nombre }}</li>
+            {% empty %}<li class="text-muted">Ninguno</li>{% endfor %}
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">Comunicación y monitoreo</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><strong>Estado:</strong> {{ riesgo.get_estado_display }}</li>
+        <li class="list-group-item"><strong>Observaciones:</strong> {{ riesgo.observaciones|default:"—" }}</li>
+        <li class="list-group-item"><strong>Última actualización:</strong> {{ riesgo.fecha_actualizacion }}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

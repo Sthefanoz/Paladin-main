@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block titulo %}Confirmar eliminación{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card border-danger">
+      <div class="card-header bg-danger text-white">Confirmar eliminación</div>
+      <div class="card-body">
+        <p>¿Seguro que desea eliminar <strong>{{ objeto }}</strong>? Esta acción no se puede deshacer.</p>
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+          <a href="{% url volver %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

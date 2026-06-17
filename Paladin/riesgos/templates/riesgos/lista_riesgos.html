@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block titulo %}Riesgos{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Riesgos registrados</h2>
+  <a href="{% url 'crear_riesgo' %}" class="btn btn-primary">Nuevo riesgo</a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Activo</th><th>Amenaza</th><th>Vulnerabilidad</th>
+          <th>P×I</th><th>Nivel</th><th>Estrategia</th>
+          <th>Residual</th><th>Estado</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in riesgos %}
+        <tr>
+          <td>{{ r.activo.nombre }}</td>
+          <td>{{ r.amenaza.nombre }}</td>
+          <td>{{ r.vulnerabilidad.nombre }}</td>
+          <td>{{ r.probabilidad }}×{{ r.impacto }} = <strong>{{ r.nivel_riesgo }}</strong></td>
+          <td>{% include 'riesgos/_badge_nivel.html' with texto=r.nivel_riesgo_texto %}</td>
+          <td>{{ r.get_estrategia_display|default:"—" }}</td>
+          <td>
+            {% if r.riesgo_residual %}{{ r.riesgo_residual }}
+              {% include 'riesgos/_badge_nivel.html' with texto=r.riesgo_residual_texto %}
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td>{{ r.get_estado_display }}</td>
+          <td class="text-end text-nowrap">
+            <a href="{% url 'detalle_riesgo' r.id %}" class="btn btn-sm btn-outline-secondary">Ver</a>
+            <a href="{% url 'editar_riesgo' r.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="{% url 'eliminar_riesgo' r.id %}" class="btn btn-sm btn-outline-danger">Borrar</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center text-muted py-4">
+          No existen riesgos registrados.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

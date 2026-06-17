@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block titulo %}Activos{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Activos Registrados</h2>
+  <a href="{% url 'crear_activo' %}" class="btn btn-primary">Nuevo Activo</a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Nombre</th><th>Tipo</th><th>Conf.</th><th>Int.</th>
+          <th>Disp.</th><th>Valor Total</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for activo in activos %}
+        <tr>
+          <td>{{ activo.nombre }}</td>
+          <td>{{ activo.get_tipo_display }}</td>
+          <td>{{ activo.confidencialidad }}</td>
+          <td>{{ activo.integridad }}</td>
+          <td>{{ activo.disponibilidad }}</td>
+          <td>{{ activo.valor_total }}</td>
+          <td class="text-end text-nowrap">
+            <a href="{% url 'editar_activo' activo.id %}" class="btn btn-outline-primary btn-sm">Editar</a>
+            <a href="{% url 'eliminar_activo' activo.id %}" class="btn btn-outline-danger btn-sm">Borrar</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No existen activos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

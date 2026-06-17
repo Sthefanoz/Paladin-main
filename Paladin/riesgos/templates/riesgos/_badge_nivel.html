@@ -1,0 +1,5 @@
+{% if texto == 'Crítico' %}<span class="badge bg-danger">Crítico</span>
+{% elif texto == 'Alto' %}<span class="badge" style="background:#fd7e14">Alto</span>
+{% elif texto == 'Medio' %}<span class="badge bg-warning text-dark">Medio</span>
+{% elif texto == 'Bajo' %}<span class="badge bg-success">Bajo</span>
+{% else %}<span class="text-muted">—</span>{% endif %}
