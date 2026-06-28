@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Django
+*.log
+local_settings.py
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Nota: db.sqlite3 SÍ se incluye a propósito (trae los datos de ejemplo
+# para la entrega del proyecto). Si no se quisiera versionar, descomentar:
+# db.sqlite3

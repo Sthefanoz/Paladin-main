@@ -10,7 +10,7 @@
     />
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-print-none">
       <div class="container">
         <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">🛡️ Paladin</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -38,7 +38,27 @@
               <a class="nav-link" href="{% url 'lista_controles' %}">Controles</a>
             </li>
           </ul>
-          <a class="btn btn-light btn-sm fw-semibold" href="{% url 'reporte' %}">📄 Reporte</a>
+          <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-light btn-sm fw-semibold" href="{% url 'reporte' %}">📄 Reporte</a>
+            {% if user.is_authenticated %}
+              <div class="dropdown">
+                <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-1"
+                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span>👤</span><span class="text-capitalize">{{ user.username }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><span class="dropdown-item-text small text-muted">Sesión iniciada como<br><strong>{{ user.username }}</strong></span></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <form method="post" action="{% url 'logout' %}">
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item text-danger">Cerrar sesión</button>
+                    </form>
+                  </li>
+                </ul>
+              </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </nav>

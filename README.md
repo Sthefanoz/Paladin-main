@@ -30,6 +30,9 @@ python manage.py runserver
 
 Luego abrir en el navegador: **http://127.0.0.1:8000/**
 
+La aplicación requiere **iniciar sesión**. La primera vez, ir a
+**http://127.0.0.1:8000/cuentas/registro/** para crear una cuenta.
+
 > En Windows, si `python` no funciona, usar `py` en su lugar
 > (por ejemplo: `py manage.py runserver`).
 

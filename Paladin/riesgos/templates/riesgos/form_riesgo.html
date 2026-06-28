@@ -18,15 +18,33 @@
           <h6 class="text-uppercase text-muted">1. Identificación</h6>
           <div class="row">
             <div class="col-md-4 mb-3">
-              <label class="form-label">Activo</label>{{ form.activo }}
+              <label class="form-label">Activo</label>
+              <div class="input-group">
+                {{ form.activo }}
+                <button type="button" class="btn btn-outline-success"
+                        data-bs-toggle="modal" data-bs-target="#modalActivo"
+                        title="Crear nuevo activo">+ Nuevo</button>
+              </div>
               {{ form.activo.errors }}
             </div>
             <div class="col-md-4 mb-3">
-              <label class="form-label">Amenaza</label>{{ form.amenaza }}
+              <label class="form-label">Amenaza</label>
+              <div class="input-group">
+                {{ form.amenaza }}
+                <button type="button" class="btn btn-outline-success"
+                        data-bs-toggle="modal" data-bs-target="#modalAmenaza"
+                        title="Crear nueva amenaza">+ Nueva</button>
+              </div>
               {{ form.amenaza.errors }}
             </div>
             <div class="col-md-4 mb-3">
-              <label class="form-label">Vulnerabilidad</label>{{ form.vulnerabilidad }}
+              <label class="form-label">Vulnerabilidad</label>
+              <div class="input-group">
+                {{ form.vulnerabilidad }}
+                <button type="button" class="btn btn-outline-success"
+                        data-bs-toggle="modal" data-bs-target="#modalVuln"
+                        title="Crear nueva vulnerabilidad">+ Nueva</button>
+              </div>
               {{ form.vulnerabilidad.errors }}
             </div>
           </div>
@@ -83,8 +101,19 @@
             <label class="form-label">Observaciones / recomendaciones</label>
             {{ form.observaciones }}
           </div>
-          <div class="mb-3">
-            <label class="form-label">Estado</label>{{ form.estado }}
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Estado</label>{{ form.estado }}
+              {{ form.estado.errors }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha de tratamiento</label>{{ form.fecha_tratamiento }}
+              {{ form.fecha_tratamiento.errors }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha de control</label>{{ form.fecha_control }}
+              {{ form.fecha_control.errors }}
+            </div>
           </div>
 
           <div class="d-flex gap-2 mt-4">
@@ -96,4 +125,138 @@
     </div>
   </div>
 </div>
+
+<!-- ===== Modales: crear al vuelo ===== -->
+
+<!-- Activo -->
+<div class="modal fade" id="modalActivo" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" data-ajax="{% url 'crear_activo_ajax' %}" data-target="id_activo">
+      <div class="modal-header"><h5 class="modal-title">Nuevo activo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="alert alert-danger d-none js-error"></div>
+        <div class="mb-2"><label class="form-label">Nombre</label>
+          <input name="nombre" class="form-control" required></div>
+        <div class="mb-2"><label class="form-label">Descripción</label>
+          <textarea name="descripcion" class="form-control" rows="2"></textarea></div>
+        <div class="mb-2"><label class="form-label">Tipo</label>
+          <select name="tipo" class="form-select" required>
+            <option value="HW">Hardware</option><option value="SW">Software</option>
+            <option value="INF">Información</option><option value="SER">Servicio</option>
+            <option value="PER">Personal</option>
+          </select></div>
+        <div class="row">
+          <div class="col"><label class="form-label">Confidencialidad</label>
+            {% include 'riesgos/_select_15.html' with nombre='confidencialidad' %}</div>
+          <div class="col"><label class="form-label">Integridad</label>
+            {% include 'riesgos/_select_15.html' with nombre='integridad' %}</div>
+          <div class="col"><label class="form-label">Disponibilidad</label>
+            {% include 'riesgos/_select_15.html' with nombre='disponibilidad' %}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success">Guardar activo</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Amenaza -->
+<div class="modal fade" id="modalAmenaza" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" data-ajax="{% url 'crear_amenaza_ajax' %}" data-target="id_amenaza">
+      <div class="modal-header"><h5 class="modal-title">Nueva amenaza</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="alert alert-danger d-none js-error"></div>
+        <div class="mb-2"><label class="form-label">Nombre</label>
+          <input name="nombre" class="form-control" required></div>
+        <div class="mb-2"><label class="form-label">Categoría</label>
+          <select name="categoria" class="form-select">
+            <option value="NAT">Natural / Desastre</option>
+            <option value="HUM">Error humano</option>
+            <option value="MAL">Ataque malicioso / Malware</option>
+            <option value="TEC" selected>Fallo técnico</option>
+            <option value="ORG">Organizacional / Procesos</option>
+          </select></div>
+        <div class="mb-2"><label class="form-label">Descripción</label>
+          <textarea name="descripcion" class="form-control" rows="2"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success">Guardar amenaza</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Vulnerabilidad -->
+<div class="modal fade" id="modalVuln" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" data-ajax="{% url 'crear_vulnerabilidad_ajax' %}" data-target="id_vulnerabilidad">
+      <div class="modal-header"><h5 class="modal-title">Nueva vulnerabilidad</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="alert alert-danger d-none js-error"></div>
+        <div class="mb-2"><label class="form-label">Nombre</label>
+          <input name="nombre" class="form-control" required></div>
+        <div class="mb-2"><label class="form-label">CVE (opcional)</label>
+          <input name="cve" class="form-control" placeholder="CVE-AAAA-NNNN"></div>
+        <div class="mb-2"><label class="form-label">Descripción</label>
+          <textarea name="descripcion" class="form-control" rows="2"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success">Guardar vulnerabilidad</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Token CSRF del formulario principal de riesgo.
+  const _csrf = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+
+  document.querySelectorAll('form[data-ajax]').forEach(function (modalForm) {
+    modalForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const errorBox = modalForm.querySelector('.js-error');
+      errorBox.classList.add('d-none');
+
+      const datos = new FormData(modalForm);
+      datos.append('csrfmiddlewaretoken', _csrf);
+
+      try {
+        const resp = await fetch(modalForm.dataset.ajax, {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          body: datos,
+        });
+        const data = await resp.json();
+
+        if (data.ok) {
+          // Añadir la nueva opción al <select> y seleccionarla.
+          const select = document.getElementById(modalForm.dataset.target);
+          const opt = new Option(data.text, data.id, true, true);
+          select.add(opt);
+          select.dispatchEvent(new Event('change'));
+          // Cerrar el modal y limpiar el mini-formulario.
+          bootstrap.Modal.getInstance(modalForm.closest('.modal')).hide();
+          modalForm.reset();
+        } else {
+          const msgs = Object.entries(data.errors || {})
+            .map(([campo, errs]) => campo + ': ' + errs.join(' '))
+            .join(' | ');
+          errorBox.textContent = msgs || 'No se pudo guardar.';
+          errorBox.classList.remove('d-none');
+        }
+      } catch (err) {
+        errorBox.textContent = 'Error de conexión. Intente de nuevo.';
+        errorBox.classList.remove('d-none');
+      }
+    });
+  });
+</script>
 {% endblock %}

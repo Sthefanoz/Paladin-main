@@ -38,6 +38,9 @@ class Activo(models.Model):
         choices=NIVEL_CIA
     )
 
+    def __str__(self):
+        return f'{self.nombre} ({self.get_tipo_display()})'
+
     @property
     def valor_total(self):
         return (

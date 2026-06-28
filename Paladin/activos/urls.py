@@ -15,6 +15,12 @@ urlpatterns = [
     ),
 
     path(
+        'nuevo-ajax/',
+        views.crear_activo_ajax,
+        name='crear_activo_ajax'
+    ),
+
+    path(
         'editar/<int:id>/',
         views.editar_activo,
         name='editar_activo'

@@ -12,8 +12,8 @@ class AmenazaAdmin(admin.ModelAdmin):
 
 @admin.register(Vulnerabilidad)
 class VulnerabilidadAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)
-    search_fields = ('nombre',)
+    list_display = ('nombre', 'cve')
+    search_fields = ('nombre', 'cve')
 
 
 @admin.register(Control)

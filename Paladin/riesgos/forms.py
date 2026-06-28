@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 
 from .models import Amenaza, Vulnerabilidad, Control, Riesgo
@@ -26,7 +28,20 @@ class VulnerabilidadForm(forms.ModelForm):
         widgets = {
             'nombre': forms.TextInput(attrs=_TEXT),
             'descripcion': forms.Textarea(attrs=_AREA),
+            'cve': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'CVE-AAAA-NNNN'}
+            ),
         }
+
+    def clean_cve(self):
+        """Valida el formato del identificador CVE (CVE-AAAA-NNNN)."""
+        cve = (self.cleaned_data.get('cve') or '').strip().upper()
+        if cve and not re.fullmatch(r'CVE-\d{4}-\d{4,7}', cve):
+            raise forms.ValidationError(
+                'Formato CVE inválido. Use el formato CVE-AAAA-NNNN '
+                '(por ejemplo, CVE-2021-44228).'
+            )
+        return cve
 
 
 class ControlForm(forms.ModelForm):
@@ -50,6 +65,7 @@ class RiesgoForm(forms.ModelForm):
             'estrategia', 'controles_propuestos', 'responsable',
             'probabilidad_residual', 'impacto_residual',
             'observaciones', 'estado',
+            'fecha_tratamiento', 'fecha_control',
         ]
         widgets = {
             'activo': forms.Select(attrs=_SELECT),
@@ -67,6 +83,12 @@ class RiesgoForm(forms.ModelForm):
             'impacto_residual': forms.Select(attrs=_SELECT),
             'observaciones': forms.Textarea(attrs=_AREA),
             'estado': forms.Select(attrs=_SELECT),
+            'fecha_tratamiento': forms.DateInput(
+                attrs={'class': 'form-control', 'type': 'date'}
+            ),
+            'fecha_control': forms.DateInput(
+                attrs={'class': 'form-control', 'type': 'date'}
+            ),
         }
 
     def clean(self):
@@ -100,6 +122,29 @@ class RiesgoForm(forms.ModelForm):
             self.add_error(
                 'controles_propuestos',
                 'Si la estrategia es "Mitigar" debe seleccionar al menos un control.'
+            )
+
+        # Coherencia de fechas y estado de monitoreo.
+        f_trat = cleaned.get('fecha_tratamiento')
+        f_ctrl = cleaned.get('fecha_control')
+        if f_trat and f_ctrl and f_ctrl < f_trat:
+            self.add_error(
+                'fecha_control',
+                'La fecha de control no puede ser anterior a la del tratamiento.'
+            )
+
+        estado = cleaned.get('estado')
+        # Para marcar como "Controlado" debe registrarse la fecha de control.
+        if estado == 'CON' and not f_ctrl:
+            self.add_error(
+                'fecha_control',
+                'Para marcar el riesgo como "Controlado" indique la fecha de control.'
+            )
+        # No se puede controlar un riesgo que aún no fue tratado.
+        if f_ctrl and not f_trat:
+            self.add_error(
+                'fecha_tratamiento',
+                'Registre primero la fecha del tratamiento antes de la de control.'
             )
 
         return cleaned

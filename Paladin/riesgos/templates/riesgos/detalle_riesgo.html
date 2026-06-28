@@ -10,6 +10,10 @@
   </div>
 </div>
 
+<div class="alert alert-secondary">
+  <strong>¿Cuál es el riesgo?</strong> {{ riesgo.enunciado }}
+</div>
+
 <div class="row g-4">
   <div class="col-md-6">
     <div class="card h-100">
@@ -18,6 +22,11 @@
         <li class="list-group-item"><strong>Activo:</strong> {{ riesgo.activo.nombre }} ({{ riesgo.activo.get_tipo_display }})</li>
         <li class="list-group-item"><strong>Amenaza:</strong> {{ riesgo.amenaza.nombre }}</li>
         <li class="list-group-item"><strong>Vulnerabilidad:</strong> {{ riesgo.vulnerabilidad.nombre }}</li>
+        <li class="list-group-item"><strong>CVE:</strong>
+          {% if riesgo.vulnerabilidad.cve %}
+            <a href="https://nvd.nist.gov/vuln/detail/{{ riesgo.vulnerabilidad.cve }}" target="_blank">{{ riesgo.vulnerabilidad.cve }}</a>
+          {% else %}<span class="text-muted">—</span>{% endif %}
+        </li>
         <li class="list-group-item"><strong>Controles existentes:</strong> {{ riesgo.controles_existentes|default:"—" }}</li>
       </ul>
     </div>
@@ -25,18 +34,32 @@
 
   <div class="col-md-6">
     <div class="card h-100">
-      <div class="card-header">Valoración</div>
+      <div class="card-header">Valoración y evolución del riesgo</div>
       <div class="card-body">
-        <p>Riesgo inherente: <strong>{{ riesgo.probabilidad }} × {{ riesgo.impacto }} = {{ riesgo.nivel_riesgo }}</strong>
-          {% include 'riesgos/_badge_nivel.html' with texto=riesgo.nivel_riesgo_texto %}</p>
-        <p>Riesgo residual:
-          {% if riesgo.riesgo_residual %}
-            <strong>{{ riesgo.probabilidad_residual }} × {{ riesgo.impacto_residual }} = {{ riesgo.riesgo_residual }}</strong>
-            {% include 'riesgos/_badge_nivel.html' with texto=riesgo.riesgo_residual_texto %}
-          {% else %}<span class="text-muted">No evaluado</span>{% endif %}
-        </p>
+        <div class="row text-center">
+          <div class="col">
+            <div class="text-muted small">Riesgo inherente</div>
+            <div class="fs-4 fw-bold">{{ riesgo.probabilidad }} × {{ riesgo.impacto }} = {{ riesgo.nivel_riesgo }}</div>
+            {% include 'riesgos/_badge_nivel.html' with texto=riesgo.nivel_riesgo_texto %}
+          </div>
+          <div class="col-auto align-self-center fs-3 text-muted">→</div>
+          <div class="col">
+            <div class="text-muted small">Riesgo residual</div>
+            {% if riesgo.riesgo_residual %}
+              <div class="fs-4 fw-bold">{{ riesgo.probabilidad_residual }} × {{ riesgo.impacto_residual }} = {{ riesgo.riesgo_residual }}</div>
+              {% include 'riesgos/_badge_nivel.html' with texto=riesgo.riesgo_residual_texto %}
+            {% else %}
+              <div class="fs-4 fw-bold text-muted">—</div>
+              <span class="text-muted">No evaluado</span>
+            {% endif %}
+          </div>
+        </div>
         {% if riesgo.reduccion is not None %}
-          <p class="mb-0">Reducción lograda: <strong>{{ riesgo.reduccion }}</strong> puntos</p>
+          <hr>
+          <p class="mb-0 text-center">
+            Reducción lograda: <strong>{{ riesgo.reduccion }}</strong> puntos
+            <span class="badge bg-success">-{{ riesgo.porcentaje_reduccion }}%</span>
+          </p>
         {% endif %}
       </div>
     </div>
@@ -64,6 +87,8 @@
       <div class="card-header">Comunicación y monitoreo</div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item"><strong>Estado:</strong> {{ riesgo.get_estado_display }}</li>
+        <li class="list-group-item"><strong>Fecha de tratamiento:</strong> {{ riesgo.fecha_tratamiento|default:"— (pendiente)" }}</li>
+        <li class="list-group-item"><strong>Fecha de control:</strong> {{ riesgo.fecha_control|default:"— (pendiente)" }}</li>
         <li class="list-group-item"><strong>Observaciones:</strong> {{ riesgo.observaciones|default:"—" }}</li>
         <li class="list-group-item"><strong>Última actualización:</strong> {{ riesgo.fecha_actualizacion }}</li>
       </ul>

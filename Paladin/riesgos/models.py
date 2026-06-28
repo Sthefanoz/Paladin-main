@@ -44,6 +44,10 @@ class Vulnerabilidad(models.Model):
 
     nombre = models.CharField(max_length=120)
     descripcion = models.TextField(blank=True)
+    cve = models.CharField(
+        'CVE', max_length=30, blank=True,
+        help_text='Identificador CVE asociado, p.ej. CVE-2021-44228 (opcional).'
+    )
 
     class Meta:
         verbose_name = 'Vulnerabilidad'
@@ -51,6 +55,8 @@ class Vulnerabilidad(models.Model):
         ordering = ['nombre']
 
     def __str__(self):
+        if self.cve:
+            return f'{self.nombre} ({self.cve})'
         return self.nombre
 
 
@@ -144,6 +150,14 @@ class Riesgo(models.Model):
 
     # --- Monitoreo y supervisión ---
     estado = models.CharField(max_length=3, choices=ESTADOS, default='IDE')
+    fecha_tratamiento = models.DateField(
+        null=True, blank=True,
+        help_text='Fecha en que se aplicó el tratamiento (controles).'
+    )
+    fecha_control = models.DateField(
+        null=True, blank=True,
+        help_text='Fecha en que el riesgo quedó controlado/verificado.'
+    )
 
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
@@ -196,3 +210,37 @@ class Riesgo(models.Model):
         if self.riesgo_residual is not None:
             return self.nivel_riesgo - self.riesgo_residual
         return None
+
+    @property
+    def porcentaje_reduccion(self):
+        """Reducción del riesgo expresada en porcentaje (evolución del riesgo)."""
+        if self.riesgo_residual is not None and self.nivel_riesgo:
+            return round(self.reduccion / self.nivel_riesgo * 100)
+        return None
+
+    @property
+    def enunciado(self):
+        """Enunciado del riesgo: qué amenaza explota qué vulnerabilidad sobre qué activo.
+
+        Deja claro 'cuál es el riesgo' siguiendo el concepto de gestión de
+        riesgos: el riesgo es la posibilidad de que una amenaza aproveche una
+        vulnerabilidad y afecte a un activo.
+        """
+        return (
+            f'Posibilidad de que la amenaza "{self.amenaza.nombre}" '
+            f'aproveche la vulnerabilidad "{self.vulnerabilidad.nombre}" '
+            f'y afecte al activo "{self.activo.nombre}".'
+        )
+
+    @property
+    def tratamiento_resumen(self):
+        """Resumen legible del tratamiento aplicado (estrategia + controles)."""
+        if not self.estrategia:
+            return 'Sin tratamiento definido'
+        controles = ', '.join(
+            c.codigo for c in self.controles_propuestos.all()
+        )
+        texto = self.get_estrategia_display()
+        if controles:
+            texto += f' mediante controles {controles}'
+        return texto

@@ -8,15 +8,23 @@
 </div>
 <div class="card"><div class="card-body p-0">
   <table class="table table-hover mb-0">
-    <thead><tr><th>Nombre</th><th>Descripción</th></tr></thead>
+    <thead><tr><th>Nombre</th><th>CVE</th><th>Descripción</th><th></th></tr></thead>
     <tbody>
       {% for v in vulnerabilidades %}
       <tr>
         <td>{{ v.nombre }}</td>
+        <td>
+          {% if v.cve %}
+            <a href="https://nvd.nist.gov/vuln/detail/{{ v.cve }}" target="_blank"><code>{{ v.cve }}</code></a>
+          {% else %}<span class="text-muted">—</span>{% endif %}
+        </td>
         <td>{{ v.descripcion|default:"—"|truncatechars:100 }}</td>
+        <td class="text-end">
+          <a href="{% url 'eliminar_vulnerabilidad' v.id %}" class="btn btn-sm btn-outline-danger">Borrar</a>
+        </td>
       </tr>
       {% empty %}
-      <tr><td colspan="2" class="text-center text-muted py-4">No hay vulnerabilidades registradas.</td></tr>
+      <tr><td colspan="4" class="text-center text-muted py-4">No hay vulnerabilidades registradas.</td></tr>
       {% endfor %}
     </tbody>
   </table>

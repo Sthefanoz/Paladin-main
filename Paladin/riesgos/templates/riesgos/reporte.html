@@ -2,24 +2,79 @@
 {% block titulo %}Reporte de riesgos{% endblock %}
 
 {% block contenido %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+  /* Orientación horizontal: declarada fuera del @media para que el
+     navegador ajuste el diálogo de impresión a horizontal automáticamente. */
+  @page { size: landscape; margin: 1cm; }
+
+  @media print {
+
+    /* Forzar la impresión de colores de fondo (badges, encabezados) */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    body { font-size: 11px; }
+    .container, .container-fluid { width: 100% !important; max-width: none !important; }
+
+    /* La tabla no se debe cortar entre páginas a mitad de fila */
+    table { font-size: 10px !important; }
+    tr, td, th { page-break-inside: avoid; }
+    thead { display: table-header-group; }  /* repite encabezado en cada página */
+
+    /* Tarjetas resumen más compactas al imprimir */
+    .display-6 { font-size: 1.4rem !important; }
+    .card-body { padding: .4rem .6rem !important; }
+  }
+</style>
+
+<!-- Encabezado solo para impresión -->
+<div class="d-none d-print-block mb-3">
+  <h3 class="mb-0">🛡️ Paladin — Reporte de gestión de riesgos</h3>
+  <small>Generado el {% now "d/m/Y H:i" %}</small>
+  <hr>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
   <h2>Reporte de gestión de riesgos</h2>
-  <button onclick="window.print()" class="btn btn-outline-secondary">🖨️ Imprimir / PDF</button>
+  <div>
+    <a href="{% url 'reporte_excel' %}" class="btn btn-success">⬇️ Descargar Excel</a>
+    <button onclick="window.print()" class="btn btn-outline-secondary">🖨️ Imprimir / PDF</button>
+  </div>
+</div>
+
+<!-- Resumen ejecutivo -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card text-bg-secondary"><div class="card-body">
+    <h6>Total de riesgos</h6><p class="display-6 mb-0">{{ total }}</p>
+  </div></div></div>
+  <div class="col-md-3"><div class="card text-bg-danger"><div class="card-body">
+    <h6>Críticos</h6><p class="display-6 mb-0">{{ niveles.Crítico }}</p>
+  </div></div></div>
+  <div class="col-md-3"><div class="card text-bg-warning"><div class="card-body">
+    <h6>Altos</h6><p class="display-6 mb-0">{{ niveles.Alto }}</p>
+  </div></div></div>
+  <div class="col-md-3"><div class="card text-bg-success"><div class="card-body">
+    <h6>Reducción global</h6>
+    <p class="display-6 mb-0">{% if reduccion_global is not None %}-{{ reduccion_global }}%{% else %}—{% endif %}</p>
+  </div></div></div>
 </div>
 
 <p class="text-muted">
-  Resumen para partes interesadas. Total de riesgos analizados: <strong>{{ total }}</strong>.
-  Distribución: Bajo {{ niveles.Bajo }}, Medio {{ niveles.Medio }},
+  Resumen para partes interesadas. Distribución por criticidad:
+  Bajo {{ niveles.Bajo }}, Medio {{ niveles.Medio }},
   Alto {{ niveles.Alto }}, Crítico {{ niveles.Crítico }}.
+  {% if reduccion_global is not None %}
+    Tras el tratamiento, el riesgo acumulado bajó de {{ suma_inherente }} a {{ suma_residual }}
+    (una reducción del {{ reduccion_global }}%).
+  {% endif %}
 </p>
 
-<table class="table table-bordered table-sm">
+<table class="table table-bordered table-sm align-middle">
   <thead class="table-dark">
     <tr>
-      <th>Activo</th><th>Amenaza</th><th>Vulnerabilidad</th>
-      <th>Riesgo inherente</th><th>Estrategia</th>
-      <th>Controles propuestos</th><th>Responsable</th>
-      <th>Riesgo residual</th><th>Estado</th><th>Observaciones</th>
+      <th>Activo</th><th>Amenaza</th><th>Vulnerabilidad (CVE)</th>
+      <th>Inherente</th><th>Tratamiento</th>
+      <th>Responsable</th><th>Residual</th><th>Evol.</th>
+      <th>Estado</th><th>F. trat.</th><th>F. control</th><th>Observaciones</th>
     </tr>
   </thead>
   <tbody>
@@ -27,19 +82,19 @@
     <tr>
       <td>{{ r.activo.nombre }}</td>
       <td>{{ r.amenaza.nombre }}</td>
-      <td>{{ r.vulnerabilidad.nombre }}</td>
+      <td>{{ r.vulnerabilidad.nombre }}{% if r.vulnerabilidad.cve %}<br><small class="text-muted">{{ r.vulnerabilidad.cve }}</small>{% endif %}</td>
       <td>{{ r.nivel_riesgo }} ({{ r.nivel_riesgo_texto }})</td>
-      <td>{{ r.get_estrategia_display|default:"—" }}</td>
-      <td>
-        {% for c in r.controles_propuestos.all %}{{ c.codigo }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
-      </td>
+      <td>{{ r.tratamiento_resumen }}</td>
       <td>{{ r.responsable|default:"—" }}</td>
       <td>{% if r.riesgo_residual %}{{ r.riesgo_residual }} ({{ r.riesgo_residual_texto }}){% else %}—{% endif %}</td>
+      <td>{% if r.porcentaje_reduccion is not None %}<span class="text-success">-{{ r.porcentaje_reduccion }}%</span>{% else %}—{% endif %}</td>
       <td>{{ r.get_estado_display }}</td>
+      <td>{{ r.fecha_tratamiento|default:"—" }}</td>
+      <td>{{ r.fecha_control|default:"—" }}</td>
       <td>{{ r.observaciones|default:"—"|truncatechars:60 }}</td>
     </tr>
     {% empty %}
-    <tr><td colspan="10" class="text-center text-muted py-4">Sin datos.</td></tr>
+    <tr><td colspan="12" class="text-center text-muted py-4">Sin datos.</td></tr>
     {% endfor %}
   </tbody>
 </table>

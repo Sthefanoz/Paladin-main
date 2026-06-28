@@ -7,6 +7,23 @@
   <a href="{% url 'crear_activo' %}" class="btn btn-primary">Nuevo Activo</a>
 </div>
 
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <select name="tipo" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">Todos los tipos</option>
+      {% for val, etiqueta in tipos %}
+        <option value="{{ val }}" {% if tipo_sel == val %}selected{% endif %}>{{ etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="orden" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="criticidad" {% if orden == 'criticidad' %}selected{% endif %}>Ordenar por criticidad (mayor valor)</option>
+      <option value="nombre" {% if orden == 'nombre' %}selected{% endif %}>Ordenar por nombre</option>
+    </select>
+  </div>
+</form>
+
 <div class="card">
   <div class="card-body p-0">
     <table class="table table-hover mb-0 align-middle">
@@ -24,7 +41,12 @@
           <td>{{ activo.confidencialidad }}</td>
           <td>{{ activo.integridad }}</td>
           <td>{{ activo.disponibilidad }}</td>
-          <td>{{ activo.valor_total }}</td>
+          <td>
+            {% if activo.valor_total >= 13 %}<span class="badge bg-danger">{{ activo.valor_total }}</span>
+            {% elif activo.valor_total >= 10 %}<span class="badge" style="background:#fd7e14">{{ activo.valor_total }}</span>
+            {% elif activo.valor_total >= 7 %}<span class="badge bg-warning text-dark">{{ activo.valor_total }}</span>
+            {% else %}<span class="badge bg-success">{{ activo.valor_total }}</span>{% endif %}
+          </td>
           <td class="text-end text-nowrap">
             <a href="{% url 'editar_activo' activo.id %}" class="btn btn-outline-primary btn-sm">Editar</a>
             <a href="{% url 'eliminar_activo' activo.id %}" class="btn btn-outline-danger btn-sm">Borrar</a>

@@ -7,6 +7,36 @@
   <a href="{% url 'crear_riesgo' %}" class="btn btn-primary">Nuevo riesgo</a>
 </div>
 
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <select name="nivel" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">Toda criticidad</option>
+      {% for n in niveles %}
+        <option value="{{ n }}" {% if nivel_sel == n %}selected{% endif %}>{{ n }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">Todos los estados</option>
+      {% for val, etiqueta in estados %}
+        <option value="{{ val }}" {% if estado_sel == val %}selected{% endif %}>{{ etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="orden" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="criticidad" {% if orden == 'criticidad' %}selected{% endif %}>Ordenar por criticidad</option>
+      <option value="reciente" {% if orden == 'reciente' %}selected{% endif %}>Ordenar por más reciente</option>
+    </select>
+  </div>
+  {% if nivel_sel or estado_sel %}
+  <div class="col-auto">
+    <a href="{% url 'lista_riesgos' %}" class="btn btn-sm btn-outline-secondary">Limpiar filtros</a>
+  </div>
+  {% endif %}
+</form>
+
 <div class="card">
   <div class="card-body p-0">
     <table class="table table-hover mb-0 align-middle">
@@ -14,7 +44,7 @@
         <tr>
           <th>Activo</th><th>Amenaza</th><th>Vulnerabilidad</th>
           <th>P×I</th><th>Nivel</th><th>Estrategia</th>
-          <th>Residual</th><th>Estado</th><th></th>
+          <th>Evolución (inherente → residual)</th><th>Estado</th><th></th>
         </tr>
       </thead>
       <tbody>
@@ -22,14 +52,22 @@
         <tr>
           <td>{{ r.activo.nombre }}</td>
           <td>{{ r.amenaza.nombre }}</td>
-          <td>{{ r.vulnerabilidad.nombre }}</td>
+          <td>
+            {{ r.vulnerabilidad.nombre }}
+            {% if r.vulnerabilidad.cve %}<br><small class="text-muted">{{ r.vulnerabilidad.cve }}</small>{% endif %}
+          </td>
           <td>{{ r.probabilidad }}×{{ r.impacto }} = <strong>{{ r.nivel_riesgo }}</strong></td>
           <td>{% include 'riesgos/_badge_nivel.html' with texto=r.nivel_riesgo_texto %}</td>
           <td>{{ r.get_estrategia_display|default:"—" }}</td>
           <td>
-            {% if r.riesgo_residual %}{{ r.riesgo_residual }}
+            {% include 'riesgos/_badge_nivel.html' with texto=r.nivel_riesgo_texto %}
+            {% if r.riesgo_residual %}
+              <span class="text-muted">→</span>
               {% include 'riesgos/_badge_nivel.html' with texto=r.riesgo_residual_texto %}
-            {% else %}<span class="text-muted">—</span>{% endif %}
+              <small class="text-success fw-semibold">(-{{ r.porcentaje_reduccion }}%)</small>
+            {% else %}
+              <span class="text-muted">→ sin evaluar</span>
+            {% endif %}
           </td>
           <td>{{ r.get_estado_display }}</td>
           <td class="text-end text-nowrap">
